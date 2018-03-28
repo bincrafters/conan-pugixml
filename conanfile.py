@@ -16,15 +16,21 @@ class pugixmlConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = "shared=False", "fPIC=True"
+    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False]}
+    default_options = "shared=False", "fPIC=True", "header_only=False"
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
-
 
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.header_only:
+            if self.settings.os != 'Windows':
+                self.options.remove("fPIC")
+            self.options.remove("shared")
+            self.settings.clear()
 
     def source(self):
         source_url = self.homepage
@@ -43,13 +49,22 @@ class pugixmlConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self.configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self.configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="license", src=self.source_subfolder)
-        cmake = self.configure_cmake()
-        cmake.install()
+        if self.options.header_only:
+            source_dir = os.path.join(self.source_subfolder, "src")
+            self.copy(pattern="*", dst="include", src=source_dir)
+        else:
+            cmake = self.configure_cmake()
+            cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.header_only:
+            self.info.header_only()
+            self.cpp_info.defines = ["PUGIXML_HEADER_ONLY"]
+        else:
+            self.cpp_info.libs = tools.collect_libs(self)

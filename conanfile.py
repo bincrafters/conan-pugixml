@@ -43,11 +43,9 @@ class pugixmlConan(ConanFile):
         # pugixml use lib64 on linux/x86_64
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.os == 'Windows' and self.settings.compiler == "Visual Studio":
-            cmake.definitions["STATIC_CRT"] = not self.options.shared
+        if self.settings.os == 'Windows':
             cmake.definitions["WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         else:
-            cmake.definitions["BUILD_PKGCONFIG"] = True
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
         cmake.configure(build_folder=self.build_subfolder)
         return cmake
@@ -58,7 +56,10 @@ class pugixmlConan(ConanFile):
             cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="license", src=self.source_subfolder)
+        readme_contents = tools.load(os.path.join(self.source_subfolder, "README.md"))
+        license_contents = readme_contents[readme_contents.find("This library is"):]
+        tools.save("LICENSE", license_contents)
+        self.copy(pattern="LICENSE", dst="licenses", src=self.build_folder)
         if self.options.header_only:
             source_dir = os.path.join(self.source_subfolder, "src")
             self.copy(pattern="*", dst="include", src=source_dir)

@@ -7,7 +7,7 @@ import os
 
 class pugixmlConan(ConanFile):
     name = "pugixml"
-    version = "1.8.1"
+    version = "1.9"
     description = "Light-weight, simple and fast XML parser for C++ with XPath support"
     url = "https://github.com/bincrafters/conan-pugixml"
     homepage = "https://github.com/zeux/pugixml"

@@ -17,8 +17,8 @@ class pugixmlConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False]}
-    default_options = "shared=False", "fPIC=True", "header_only=False"
+    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False], "wchar_mode" : [True, False]}
+    default_options = "shared=False", "fPIC=True", "header_only=False", "wchar_mode=False"
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
@@ -52,6 +52,9 @@ class pugixmlConan(ConanFile):
         return cmake
 
     def build(self):
+        if self.options.wchar_mode:
+            header_file = os.path.join(self.source_subfolder, "src", "pugiconfig.hpp")
+            tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
         if not self.options.header_only:
             cmake = self.configure_cmake()
             cmake.build()

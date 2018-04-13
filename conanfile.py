@@ -52,10 +52,12 @@ class pugixmlConan(ConanFile):
         return cmake
 
     def build(self):
+        header_file = os.path.join(self.source_subfolder, "src", "pugiconfig.hpp")
         if self.options.wchar_mode:
-            header_file = os.path.join(self.source_subfolder, "src", "pugiconfig.hpp")
             tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
-        if not self.options.header_only:
+        if self.options.header_only:
+            tools.replace_in_file(header_file, "// #define PUGIXML_HEADER_ONLY", '''#define PUGIXML_HEADER_ONLY''')
+        else:
             cmake = self.configure_cmake()
             cmake.build()
 

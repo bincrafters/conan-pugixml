@@ -44,9 +44,7 @@ class pugixmlConan(ConanFile):
         # pugixml use lib64 on linux/x86_64
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.os != 'Windows':
-            cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-        elif self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
+        if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
             cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
         return cmake

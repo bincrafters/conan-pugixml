@@ -17,7 +17,12 @@ class pugixmlConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False], "wchar_mode" : [True, False]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "header_only": [True, False],
+        "wchar_mode": [True, False]
+    }
     default_options = "shared=False", "fPIC=True", "header_only=False", "wchar_mode=False"
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
@@ -44,9 +49,7 @@ class pugixmlConan(ConanFile):
         # pugixml use lib64 on linux/x86_64
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.os != 'Windows':
-            cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-        elif self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
+        if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
             cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
         return cmake
@@ -54,9 +57,11 @@ class pugixmlConan(ConanFile):
     def build(self):
         header_file = os.path.join(self.source_subfolder, "src", "pugiconfig.hpp")
         if self.options.wchar_mode:
-            tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
+            tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE",
+                                  '''#define PUGIXML_WCHAR_MODE''')
         if self.options.header_only:
-            tools.replace_in_file(header_file, "// #define PUGIXML_HEADER_ONLY", '''#define PUGIXML_HEADER_ONLY''')
+            tools.replace_in_file(header_file, "// #define PUGIXML_HEADER_ONLY",
+                                  '''#define PUGIXML_HEADER_ONLY''')
         else:
             cmake = self.configure_cmake()
             cmake.build()

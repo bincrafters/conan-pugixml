@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -23,9 +20,9 @@ class pugixmlConan(ConanFile):
         "header_only": [True, False],
         "wchar_mode": [True, False]
     }
-    default_options = "shared=False", "fPIC=True", "header_only=False", "wchar_mode=False"
-    source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
+    default_options = {'shared': False, 'fPIC': True, 'header_only': False, 'wchar_mode': False}
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -42,20 +39,20 @@ class pugixmlConan(ConanFile):
         source_url = self.homepage
         tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self.source_subfolder)
+        os.rename(extracted_dir, self._source_subfolder)
 
-    def configure_cmake(self):
+    def _configure_cmake(self):
         cmake = CMake(self)
         # pugixml use lib64 on linux/x86_64
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["BUILD_TESTS"] = False
         if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
             cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
-        header_file = os.path.join(self.source_subfolder, "src", "pugiconfig.hpp")
+        header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
         if self.options.wchar_mode:
             tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE",
                                   '''#define PUGIXML_WCHAR_MODE''')
@@ -63,19 +60,19 @@ class pugixmlConan(ConanFile):
             tools.replace_in_file(header_file, "// #define PUGIXML_HEADER_ONLY",
                                   '''#define PUGIXML_HEADER_ONLY''')
         else:
-            cmake = self.configure_cmake()
+            cmake = self._configure_cmake()
             cmake.build()
 
     def package(self):
-        readme_contents = tools.load(os.path.join(self.source_subfolder, "README.md"))
+        readme_contents = tools.load(os.path.join(self._source_subfolder, "README.md"))
         license_contents = readme_contents[readme_contents.find("This library is"):]
         tools.save("LICENSE", license_contents)
         self.copy(pattern="LICENSE", dst="licenses", src=self.build_folder)
         if self.options.header_only:
-            source_dir = os.path.join(self.source_subfolder, "src")
+            source_dir = os.path.join(self._source_subfolder, "src")
             self.copy(pattern="*", dst="include", src=source_dir)
         else:
-            cmake = self.configure_cmake()
+            cmake = self._configure_cmake()
             cmake.install()
 
     def package_info(self):

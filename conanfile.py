@@ -8,7 +8,6 @@ class pugixmlConan(ConanFile):
     description = "Light-weight, simple and fast XML parser for C++ with XPath support"
     url = "https://github.com/bincrafters/conan-pugixml"
     homepage = "https://github.com/zeux/pugixml"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]

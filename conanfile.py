@@ -9,7 +9,6 @@ class pugixmlConan(ConanFile):
     url = "https://github.com/bincrafters/conan-pugixml"
     homepage = "https://github.com/zeux/pugixml"
     license = "MIT"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
